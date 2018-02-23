@@ -2,13 +2,14 @@ package com.redhat.it.util.docker;
 
 import java.util.AbstractMap;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /**
  * Convenience method for abstracting username/password auth
  */
-public class UsernamePasswordAuth implements BasicAuthHeaderable, DirectAccessGrantable {
+public class UsernamePasswordAuth implements AuthHeaderable, OauthGrantable {
 
 	private final String username;
 	private final String password;
@@ -28,8 +29,29 @@ public class UsernamePasswordAuth implements BasicAuthHeaderable, DirectAccessGr
 	}
 
 	@Override
-	public Map<String, String> asDirectAccessGrantParams() {
-		// TODO
-		return null;
+	public Map<String, String> asGrantParams() {
+		final Map<String, String> grantParams = new HashMap<>();
+		grantParams.put("grant_type", "password");
+		grantParams.put("username", username);
+		grantParams.put("password", password);
+		return grantParams;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		final UsernamePasswordAuth that = (UsernamePasswordAuth) o;
+
+		if (username != null ? !username.equals(that.username) : that.username != null) return false;
+		return password != null ? password.equals(that.password) : that.password == null;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = username != null ? username.hashCode() : 0;
+		result = 31 * result + (password != null ? password.hashCode() : 0);
+		return result;
 	}
 }

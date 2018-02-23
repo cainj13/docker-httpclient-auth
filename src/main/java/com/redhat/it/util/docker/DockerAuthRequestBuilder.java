@@ -8,16 +8,17 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * Provides the ability to construct request sfor use against a docker endpoint
+ * Provides the ability to construct requests for use against a docker endpoint
  *
  * @see <a href="https://docs.docker.com/registry/spec/auth/token/">Docker Token Spec</a>
  */
 public class DockerAuthRequestBuilder implements Supplier<HttpUriRequest> {
+	public static final String DEFAULT_CLIENT_ID = "docker-httpclient-auth";
 
-	private final BasicAuthHeaderable credentials;
+	private final AuthHeaderable credentials;
 	private final String service;
 	private boolean offline_token = false;
-	private String client_id = "docker-httpclient-ath";
+	private String client_id = DEFAULT_CLIENT_ID;
 	private final Set<String> scopes = new HashSet<>();
 
 	/**
@@ -27,7 +28,7 @@ public class DockerAuthRequestBuilder implements Supplier<HttpUriRequest> {
 	 * @param service name of the service that hosts the resource.  Typically an identifier associated with the protected
 	 *                registry (I.E. https://my.proptected.registry).
 	 */
-	public DockerAuthRequestBuilder(final BasicAuthHeaderable credentials, final String service) {
+	public DockerAuthRequestBuilder(final AuthHeaderable credentials, final String service) {
 		Objects.requireNonNull(credentials, "Cannot make docker authentication request without credentials");
 		Objects.requireNonNull(service, "Cannot make docker authentication request without service parameter");
 
