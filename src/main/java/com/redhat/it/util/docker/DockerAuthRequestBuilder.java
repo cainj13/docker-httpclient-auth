@@ -1,18 +1,23 @@
 package com.redhat.it.util.docker;
 
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URIBuilder;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Provides the ability to construct requests for use against a docker endpoint
  *
  * @see <a href="https://docs.docker.com/registry/spec/auth/token/">Docker Token Spec</a>
  */
-public class DockerAuthRequestBuilder implements Supplier<HttpUriRequest> {
+public class DockerAuthRequestBuilder implements Function<URI, HttpUriRequest> {
 	public static final String DEFAULT_CLIENT_ID = "docker-httpclient-auth";
 
 	private final AuthHeaderable credentials;
@@ -25,8 +30,8 @@ public class DockerAuthRequestBuilder implements Supplier<HttpUriRequest> {
 	 * Constructs a basic docker auth request
 	 *
 	 * @param credentials user credentials associated with the request
-	 * @param service name of the service that hosts the resource.  Typically an identifier associated with the protected
-	 *                registry (I.E. https://my.proptected.registry).
+	 * @param service     name of the service that hosts the resource.  Typically an identifier associated with the protected
+	 *                    registry (I.E. https://my.proptected.registry).
 	 */
 	public DockerAuthRequestBuilder(final AuthHeaderable credentials, final String service) {
 		Objects.requireNonNull(credentials, "Cannot make docker authentication request without credentials");
@@ -68,7 +73,26 @@ public class DockerAuthRequestBuilder implements Supplier<HttpUriRequest> {
 	}
 
 	@Override
-	public HttpUriRequest get() {
-		return null;
+	public HttpUriRequest apply(final URI uri) {
+		final URIBuilder uriBuilder = new URIBuilder(uri);
+
+		uriBuilder.addParameter("service", service);
+		uriBuilder.addParameter("client_id", client_id);
+		if(offline_token) {
+			uriBuilder.addParameter("offline_token", String.valueOf(offline_token));
+		}
+		if(!scopes.isEmpty()) {
+			scopes.forEach(scope -> uriBuilder.addParameter("scope", scope.toString()));
+		}
+
+		try {
+			final HttpGet getRequest = new HttpGet(uriBuilder.build());
+			final Map.Entry<String, String> credentialsEntry = credentials.asBasicAuthHeader();
+			getRequest.addHeader(credentialsEntry.getKey(), credentialsEntry.getValue());
+
+			return getRequest;
+		} catch (URISyntaxException e) {
+			throw new DockerAuthRequestException("Error attempting to build request URI", e);
+		}
 	}
 }

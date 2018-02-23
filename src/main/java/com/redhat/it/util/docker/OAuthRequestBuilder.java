@@ -1,16 +1,24 @@
 package com.redhat.it.util.docker;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicNameValuePair;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Provides the ability to construct Oauth2 requests for use against a docker endpoint
  *
  * @see <a href="https://docs.docker.com/registry/spec/auth/oauth/">Docker Oauth2 Spec</a>
  */
-public class OAuthRequestBuilder implements Supplier<HttpUriRequest> {
+public class OAuthRequestBuilder implements Function<URI, HttpUriRequest> {
 
 	private final OauthGrantable credentials;
 	private final String service;
@@ -54,7 +62,26 @@ public class OAuthRequestBuilder implements Supplier<HttpUriRequest> {
 	}
 
 	@Override
-	public HttpUriRequest get() {
-		return null;
+	public HttpUriRequest apply(final URI uri) {
+		final List<NameValuePair> postParams = new ArrayList<>();
+
+		credentials.asGrantParams().entrySet().stream()
+				.map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
+				.forEach(postParams::add);
+
+		postParams.add(new BasicNameValuePair("service", service));
+		postParams.add(new BasicNameValuePair("client_id", client_id));
+
+		access_type.ifPresent(access_type -> postParams.add(new BasicNameValuePair("access_type", access_type)));
+		scope.ifPresent(scope -> postParams.add(new BasicNameValuePair("scope", scope.toString())));
+
+		try {
+			final HttpPost postRequest = new HttpPost(uri);
+			postRequest.setEntity(new UrlEncodedFormEntity(postParams));
+
+			return postRequest;
+		} catch (UnsupportedEncodingException e) {
+			throw new DockerAuthRequestException("Unable to encode POST form parameters", e);
+		}
 	}
 }
