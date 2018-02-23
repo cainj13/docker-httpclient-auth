@@ -1,5 +1,7 @@
 package com.redhat.it.util.docker;
 
+import com.redhat.it.util.docker.Constants.Oauth;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +22,8 @@ public class RefreshTokenAuth implements OauthGrantable {
 	@Override
 	public Map<String, String> asGrantParams() {
 		Map<String,String> grantParams = new HashMap<>();
-		grantParams.put("grant_type", "refresh_token");
-		grantParams.put("refresh_token", refresh_token);
+		grantParams.put(Oauth.GRANT_TYPE, Oauth.REFRESH_TOKEN);
+		grantParams.put(Oauth.REFRESH_TOKEN, refresh_token);
 		return grantParams;
 	}
 

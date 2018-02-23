@@ -1,5 +1,6 @@
 package com.redhat.it.util.docker;
 
+import com.redhat.it.util.docker.Constants.Parameters;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -22,7 +23,7 @@ public class OAuthRequestBuilder implements Function<URI, HttpUriRequest> {
 
 	private final OauthGrantable credentials;
 	private final String service;
-	private String client_id = DockerAuthRequestBuilder.DEFAULT_CLIENT_ID;
+	private String client_id = Constants.DEFAULT_CLIENT_ID;
 	private Optional<String> access_type = Optional.empty();
 	private Optional<Scope> scope = Optional.empty();
 
@@ -69,11 +70,11 @@ public class OAuthRequestBuilder implements Function<URI, HttpUriRequest> {
 				.map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
 				.forEach(postParams::add);
 
-		postParams.add(new BasicNameValuePair("service", service));
-		postParams.add(new BasicNameValuePair("client_id", client_id));
+		postParams.add(new BasicNameValuePair(Parameters.SERVICE, service));
+		postParams.add(new BasicNameValuePair(Parameters.CLIENT_ID, client_id));
 
-		access_type.ifPresent(access_type -> postParams.add(new BasicNameValuePair("access_type", access_type)));
-		scope.ifPresent(scope -> postParams.add(new BasicNameValuePair("scope", scope.toString())));
+		access_type.ifPresent(access_type -> postParams.add(new BasicNameValuePair(Parameters.ACCESS_TYPE, access_type)));
+		scope.ifPresent(scope -> postParams.add(new BasicNameValuePair(Parameters.SCOPE, scope.toString())));
 
 		try {
 			final HttpPost postRequest = new HttpPost(uri);

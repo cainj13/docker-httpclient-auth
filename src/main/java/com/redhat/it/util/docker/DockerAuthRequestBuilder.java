@@ -1,5 +1,6 @@
 package com.redhat.it.util.docker;
 
+import com.redhat.it.util.docker.Constants.Parameters;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
@@ -18,12 +19,11 @@ import java.util.function.Function;
  * @see <a href="https://docs.docker.com/registry/spec/auth/token/">Docker Token Spec</a>
  */
 public class DockerAuthRequestBuilder implements Function<URI, HttpUriRequest> {
-	public static final String DEFAULT_CLIENT_ID = "docker-httpclient-auth";
 
 	private final AuthHeaderable credentials;
 	private final String service;
 	private boolean offline_token = false;
-	private String client_id = DEFAULT_CLIENT_ID;
+	private String client_id = Constants.DEFAULT_CLIENT_ID;
 	private final Set<String> scopes = new HashSet<>();
 
 	/**
@@ -76,13 +76,13 @@ public class DockerAuthRequestBuilder implements Function<URI, HttpUriRequest> {
 	public HttpUriRequest apply(final URI uri) {
 		final URIBuilder uriBuilder = new URIBuilder(uri);
 
-		uriBuilder.addParameter("service", service);
-		uriBuilder.addParameter("client_id", client_id);
+		uriBuilder.addParameter(Parameters.SERVICE, service);
+		uriBuilder.addParameter(Parameters.CLIENT_ID, client_id);
 		if(offline_token) {
-			uriBuilder.addParameter("offline_token", String.valueOf(offline_token));
+			uriBuilder.addParameter(Parameters.OFFLINE_TOKEN, String.valueOf(offline_token));
 		}
 		if(!scopes.isEmpty()) {
-			scopes.forEach(scope -> uriBuilder.addParameter("scope", scope.toString()));
+			scopes.forEach(scope -> uriBuilder.addParameter(Parameters.SCOPE, scope.toString()));
 		}
 
 		try {

@@ -11,6 +11,9 @@ import java.util.Objects;
  */
 public class UsernamePasswordAuth implements AuthHeaderable, OauthGrantable {
 
+	public static final String BASIC_AUTH_HEADER_KEY = "Authorization";
+	public static final String BASIC_PREFIX = "Basic ";
+
 	private final String username;
 	private final String password;
 
@@ -25,15 +28,15 @@ public class UsernamePasswordAuth implements AuthHeaderable, OauthGrantable {
 	@Override
 	public Map.Entry<String, String> asBasicAuthHeader() {
 		final String basicAuthString = username + ":" + password;
-		return new AbstractMap.SimpleImmutableEntry("Authorization", "Basic " + Base64.getEncoder().encodeToString(basicAuthString.getBytes()));
+		return new AbstractMap.SimpleImmutableEntry(BASIC_AUTH_HEADER_KEY, BASIC_PREFIX + Base64.getEncoder().encodeToString(basicAuthString.getBytes()));
 	}
 
 	@Override
 	public Map<String, String> asGrantParams() {
 		final Map<String, String> grantParams = new HashMap<>();
-		grantParams.put("grant_type", "password");
-		grantParams.put("username", username);
-		grantParams.put("password", password);
+		grantParams.put(Constants.Oauth.GRANT_TYPE, Constants.Oauth.PASSWORD);
+		grantParams.put(Constants.Oauth.USERNAME, username);
+		grantParams.put(Constants.Oauth.PASSWORD, password);
 		return grantParams;
 	}
 
