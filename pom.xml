@@ -6,7 +6,6 @@
     <artifactId>docker-httpclient-auth</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-
     <name>Docker HttpClient Auth</name>
     <url>https://github.com/cainj13/docker-httpclient-auth</url>
 
