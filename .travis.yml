@@ -1,2 +1,9 @@
 language: java
+sudo: false
+
+deploy:
+  provider: script
+  script: "mvn clean deploy -P release"
+  on:
+    tags: true
 

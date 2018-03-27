@@ -16,3 +16,7 @@ buildNumber.properties
 *.ipr
 *.iml
 *.iws
+
+# vim
+*.swp
+*.swo
